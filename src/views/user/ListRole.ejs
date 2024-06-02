@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+      Manage User
+    </title>
+    <script>
+      function checker(e){
+        if(!window.confirm("Are you sure delete user!")){
+          e.preventDefault();
+        } else {
+          return;
+        }
+      }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <div
+              class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
+            >
+            <!-- Breadcrumb Start -->
+            <div
+              class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <h2 class="text-title-md2 font-bold text-black dark:text-white">
+                Role Manager
+              </h2>
+
+              <nav>
+                <ol class="flex items-center gap-2">
+                  <li>
+                    <a class="font-medium" href="../dashboard">Dashboard /</a>
+                  </li>
+                  <li class="font-medium text-primary">Role Manager</li>
+                </ol>
+              </nav>
+            </div>
+            <!-- Breadcrumb End -->
+            <div class="max-w-full overflow-x-auto">
+              <table class="w-full table-auto">
+                <thead>
+                  <tr class="bg-gray-2 text-left dark:bg-meta-4">
+                    <th
+                      class="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                    >
+                      #ID
+                    </th>
+                    <th
+                      class="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white"
+                    >
+                      Name Role
+                    </th>
+                    <th class="px-4 py-4 font-medium text-black dark:text-white">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  <% for(var i=0; i < data.length; i++) { %>
+                  <tr>
+                    <td
+                      class="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11"
+                    >
+                      <h5 class="font-medium text-black dark:text-white"><%= data[i].id %></h5>
+                    </td>
+                    <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                      <p class="text-black dark:text-white"><%= data[i].name %></p>
+                    </td>
+                    <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                      <div class="flex items-center space-x-3.5">
+                        <a class="hover:text-primary" href="/user/edit-add-role?id=<%= data[i].id %>" type="button">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                          </svg>
+                        </a>
+                        <a class="hover:text-primary" href="/user/delete-role?id=<%= data[i].id %>" type="button">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" onclick="checker(event)">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" onclick="checker(event)"/>
+                          </svg>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                  <% } %>
+                  
+                </tbody>
+              </table>
+              <div class="my-4">
+                <a
+                    href="/user/edit-add-role?id=-1"
+                    class="inline-flex items-center justify-center gap-2.5 bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                  >
+                    <span>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    </span>
+                    Add new Role
+                  </a>
+                  <a
+                    href="/user/get-permission-role"
+                    class="inline-flex items-center justify-center gap-2.5 bg-blue-500 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                  >
+                    <span>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    </span>
+                    Permission Matrix
+                  </a>
+              </div>
+            </div>
+          </div>
+            
+
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+  </body>
+</html>
+

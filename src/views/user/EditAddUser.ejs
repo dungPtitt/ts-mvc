@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+      Create And Update User
+    </title>
+    <script>
+      function checker(e){
+        if(!window.confirm("Are you sure Create user!")){
+          e.preventDefault();
+        } else {
+          return;
+        }
+      }
+      let username= document.getElementsByName("username")[0].value;
+      let email = document.getElementsByName("email")[0].value;
+      let password= document.getElementsByName("password")[0].value;
+      let rePassword= document.getElementsByName("re-password")[0].value;
+      if(!username || !email || !password || !rePassword) {
+        return window.alert("Missing input value")
+      }
+
+      mobiscroll.select('#multiple-select', {
+          inputElement: document.getElementById('my-input'),
+          touchUi: false
+      });
+
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-[800px] p-4 md:p-6 2xl:p-10">
+            <div
+              class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
+            >
+            <!-- Breadcrumb Start -->
+            <div
+              class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <nav>
+                <ol class="flex items-center gap-2">
+                  <li>
+                    <a class="font-medium" href="../dashboard">Dashboard /</a>
+                  </li>
+                  <li>
+                    <a class="font-medium" href="/user/get-user"> All Users/</a>
+                  </li>
+                  <li class="font-medium text-primary">
+                    <% if (idUser != -1) { %>
+                      Edit User
+                    <%} else { %>
+                      Add User
+                    <% } %>
+                  </li>
+                </ol>
+              </nav>
+            </div>
+            <!-- Breadcrumb End -->
+            <div
+              class="border-b border-stroke px-6.5 py-4 dark:border-strokedark"
+            >
+              <h3 class="font-medium text-black dark:text-white">
+                <% if (idUser != -1) { %>
+                  Edit User
+                <%} else { %>
+                  Add User
+                <% } %>
+              </h3>
+            </div>
+            <form action="<% if(idUser != -1){ %>
+              /user/update-user
+              <%} else { %>
+              /user/create-user
+              <% } %>"
+              method="POST" id="edit-add-form">
+              <div class="p-6.5">
+                <div class="mb-4.5">
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    User Name
+                  </label>
+                  <input
+                    type="text"
+                    value="<%= data.username %>" 
+                    name="username"
+                    required
+                    placeholder="Enter your user name"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+
+                <div class="mb-4.5">
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value="<%= data.email %>" 
+                    name="email" 
+                    required
+                    placeholder="Enter your email address"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+
+                <div class="mb-4.5" <% if(idUser!=-1) {%> hidden <%}%>>
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password" 
+                    placeholder="Enter password"
+                    autocomplete="password"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+
+                <div class="mb-5.5" <% if(idUser!=-1) {%> hidden <%}%>>
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Re-type Password
+                  </label>
+                  <input
+                    type="password"
+                    name="re-password" 
+                    placeholder="Re-enter password"
+                    autocomplete="re-enter-password"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <!-- <div class="mb-4.5">
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Role
+                  </label>
+                  <div
+                    x-data="{ isOptionSelected: false }"
+                    class="relative z-20 bg-white dark:bg-form-input"
+                  >
+                    <select
+                      class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                      :class="isOptionSelected && 'text-black dark:text-white'"
+                      @change="isOptionSelected = true"
+                      name="roleId" 
+                    >
+                      
+                      <% for(let i=0; i < data.allRoles.length; i++) { %>
+                      <option value="<%= data.allRoles[i].id %>" class="text-body"><%= data.allRoles[i].name %></option>
+                      <% } %>
+                    </select>
+                    <span
+                      class="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g opacity="0.8">
+                          <path
+                            fill-rule="evenodd"
+                            clip-rule="evenodd"
+                            d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                            fill="#637381"
+                          ></path>
+                        </g>
+                      </svg>
+                    </span>
+                  </div>
+                </div> -->
+                <div  div x-data="{ open: false }" class="relative mb-5 z-20 bg-white dark:bg-form-input">
+                  <label for="states" class="sr-only">Choose a state</label>
+                  <div class="relative inline-block w-full">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <button @click="open = !open" type="button" aria-haspopup="true" aria-expanded="true" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg border-solid dark:border-gray-600 dark:text-white dark:bg-gray-700 p-2.5 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        Roles
+                        <svg x-show="!open" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M6.293 7.293a1 1 0 0 1 1.414 0L10 9.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414zM6 13a1 1 0 1 1 0-2h8a1 1 0 1 1 0 2H6z" clip-rule="evenodd" />
+                        </svg>
+                        <svg x-show="open" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M13.707 8.293a1 1 0 0 1 1.414 1.414L11 13.414V14a1 1 0 1 1-2 0v-0.586l-3.121-3.121a1 1 0 1 1 1.414-1.414L10 10.586l2.293-2.293a1 1 0 0 1 1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                      <div x-show="open" @click.away="open = false" class="origin-top-left absolute left-0 mt-2 w-full rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 z-50">
+                        <% for(let i=0; i < data.allRoles.length; i++) { %>
+                          <label class="inline-flex items-center m-2">
+                              <input 
+                              type="checkbox" 
+                              class="form-checkbox h-5 w-5 text-blue-500" 
+                              value="<%= data.allRoles[i].id %>" 
+                              name="roles"
+                              <% if(idUser!=-1 && data.roles[i].id) {%> checked <%}%>
+                            >
+                            <span class="ml-2 text-gray-900 dark:text-white"><%= data.allRoles[i].name %></span>
+                          </label>
+                        <% } %>
+                        
+                        <!-- Add more options as needed -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <label>
+                    Multi-select
+                    <input mbsc-input id="my-input" data-dropdown="true" data-tags="true" />
+                </label>
+                <select id="multiple-select" multiple>
+                    <option value="1">Books</option>
+                    <option value="2">Movies, Music & Games</option>
+                    <option value="3">Electronics & Computers</option>
+                    <option value="4">Home, Garden & Tools</option>
+                    <option value="5">Health & Beauty</option>
+                    <option value="6">Toys, Kids & Baby</option>
+                    <option value="7">Clothing & Jewelry</option>
+                    <option value="8">Sports & Outdoors</option>
+                </select>
+
+                <input type="text" name="id" value="<%= data.id %>" hidden />
+                <button
+                  class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  form="edit-add-form" onclick="checker(event)"
+                >
+                  <% if(idUser!=-1){ %>
+                    Update User
+                  <% } else{ %>  
+                    Create User
+                  <% } %>
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+  </body>
+</html>
+

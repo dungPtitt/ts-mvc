@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+      Create And Update Role
+    </title>
+    <script>
+      function checker(e){
+        if(!window.confirm("Are you sure create role!")){
+          e.preventDefault();
+        } else {
+          return;
+        }
+      }
+      let name= document.getElementsByName("name")[0].value;
+      if(!name) {
+        return window.alert("Missing input value")
+      }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-[800px] p-4 md:p-6 2xl:p-10">
+            <div
+              class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
+            >
+            <!-- Breadcrumb Start -->
+            <div
+              class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <nav>
+                <ol class="flex items-center gap-2">
+                  <li>
+                    <a class="font-medium" href="../dashboard">Dashboard /</a>
+                  </li>
+                  <li>
+                    <a class="font-medium" href="/user/get-role"> Role Manager/</a>
+                  </li>
+                  <li class="font-medium text-primary">
+                    <% if (roleId != -1) { %>
+                      Edit Role
+                    <%} else { %>
+                      Add Role
+                    <% } %>
+                  </li>
+                </ol>
+              </nav>
+            </div>
+            <!-- Breadcrumb End -->
+            <div
+              class="border-b border-stroke px-6.5 py-4 dark:border-strokedark"
+            >
+              <!-- <h3 class="font-medium text-black dark:text-white">
+                <% if (roleId != -1) { %>
+                  Edit Role
+                <%} else { %>
+                  Add Role
+                <% } %>
+              </h3> -->
+            </div>
+            <form action="<% if(roleId != -1){ %>
+              /user/update-role
+              <%} else { %>
+              /user/create-role
+              <% } %>"
+              method="POST" id="edit-add-form">
+              <div class="p-6.5">
+                <div class="mb-4.5">
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Role Name
+                  </label>
+                  <input
+                    type="text"
+                    value="<%= data.name %>" 
+                    name="name"
+                    required
+                    placeholder="Enter role name"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+
+                <input type="text" name="id" value="<%= data.id %>" hidden />
+                <button
+                  class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  form="edit-add-form" onclick="checker(event)"
+                >
+                  <% if(roleId!=-1){ %>
+                    Update Role
+                  <% } else{ %>  
+                    Create Role
+                  <% } %>
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+  </body>
+</html>
+

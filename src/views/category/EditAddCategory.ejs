@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+      Create And Update Category
+    </title>
+    <script>
+      function checker(e){
+        if(!window.confirm("Are you sure Create category!")){
+          e.preventDefault();
+        } else {
+          return;
+        }
+      }
+      let name= document.getElementsByName("name")[0].value;
+      if(!name) {
+        return window.alert("Missing input value")
+      }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-[800px] p-4 md:p-6 2xl:p-10">
+            <div
+            class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
+          >
+            <div
+              class="border-b border-stroke px-6.5 py-4 dark:border-strokedark"
+            >
+              <h3 class="font-medium text-black dark:text-white">
+                <% if (idCategory != -1) { %>
+                  Edit Category
+                <%} else { %>
+                  Add Category
+                <% } %>
+              </h3>
+            </div>
+            <form action="<% if(idCategory != -1){ %>
+              /category/update
+              <%} else { %>
+              /category/create
+              <% } %>"
+              method="POST" id="edit-add-form">
+              <div class="p-6.5">
+                <div class="mb-4.5">
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Category Name
+                  </label>
+                  <input
+                    type="text"
+                    value="<%= data.name %>" 
+                    name="name"
+                    required
+                    placeholder="Enter your category name"
+                    class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <input type="text" name="id" value="<%= data.id %>" hidden />
+                
+                <button
+                  class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  form="edit-add-form" onclick="checker(event)"
+                >
+                  <% if(idCategory!=-1){ %>
+                    Update Category
+                  <% } else{ %>  
+                    Create Category
+                  <% } %>
+                </button>
+              </div>
+            </form>
+          </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+  </body>
+</html>
+

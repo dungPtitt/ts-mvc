@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+     Dashboard
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.3.1/classic/ckeditor.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <!-- Breadcrumb Start -->
+            <div
+              class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <h2 class="text-title-md2 font-bold text-black dark:text-white">
+                Blog Post - <%=page%>
+              </h2>
+
+              <nav>
+                <ol class="flex items-center gap-2">
+                  <li>
+                    <a class="font-medium" href="index.html">Dashboard /</a>
+                  </li>
+                  <li class="font-medium text-primary"><%=page%></li>
+                </ol>
+              </nav>
+            </div>
+            <!-- Breadcrumb End -->
+            
+            <!-- ====== Form Elements Section Start -->
+            <form id="add-new-form" enctype="multipart/form-data">
+            <div class="grid grid-cols-1 gap-9 sm:grid-cols-4">
+              <div class="flex flex-col gap-9 sm:col-span-3">
+                <!-- Textarea Fields -->
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+                >
+                  <div
+                    class="border-b border-stroke px-6.5 py-4 dark:border-strokedark"
+                  >
+                    <h3 class="font-medium text-black dark:text-white">
+                      Content
+                    </h3>
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5">
+                      <textarea
+                        placeholder="Blog post's content..."
+                        name="content"
+                        id="content"
+                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      ><% if (postData !== null) { %>
+                        <%= postData.content %>
+                      <% } %></textarea>
+                  </div>
+                </div>
+
+              </div>
+              <div class="flex flex-col gap-9">
+                <!-- Input Fields -->
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+                >
+                  <div
+                    class=" border-stroke px-6.5 dark:border-strokedark"
+                  >
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5">
+                    <div>
+                      <label
+                        class="mb-3 block text-sm font-medium text-black dark:text-white"
+                      >
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Blog's title..."
+                        name="title"
+                        id="title"
+                        value="<%= postData !== null ? postData.title : '' %>"
+                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="mb-3 block text-sm font-medium text-black dark:text-white"
+                      >
+                        Category
+                      </label>
+                      <div
+                        x-data="{ isOptionSelected: false }"
+                        class="relative z-20 bg-white dark:bg-form-input"
+                      >
+                        <select
+                          class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                          :class="isOptionSelected && 'text-black dark:text-white'"
+                          @change="isOptionSelected = true"
+                          name="categoryId"
+                          
+                          id="categoryId"
+                        >
+                        <%for(item of categories) {%>
+                          <option value="<%= item.id%>" <%= postData && item.id == postData.categoryId ? 'selected' : '' %> class="text-body"><%= item.name%></option>
+                          <%}%>
+                        </select>
+                        
+                        <span
+                          class="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+                        >
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <g opacity="0.8">
+                              <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                fill="#637381"
+                              ></path>
+                            </g>
+                          </svg>
+                        </span>
+                      </div>
+                      <div>
+                          <label
+                            class="mb-3 block text-sm font-medium text-black dark:text-white"
+                          >
+                            Status
+                          </label>
+                          <div
+                            x-data="{ isOptionSelected: false }"
+                            class="relative z-20 bg-white dark:bg-form-input"
+
+                          >
+                            <select
+                              class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                              :class="isOptionSelected && 'text-black dark:text-white'"
+                              @change="isOptionSelected = true"
+                              name="status"
+                              id="status"
+                              <% if (page === 'Add New') { %>
+                                disabled
+                              <% } %>
+                              
+                            >
+                            <%for(item of status) {%>
+                              <option value="<%= item%>" <%= postData&& item === postData.status ? 'selected' : '' %>class="text-body"><%= item%></option>
+                              <%}%>
+                            </select>
+                            
+                            <span
+                              class="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+                            >
+                              <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <g opacity="0.8">
+                                  <path
+                                    fill-rule="evenodd"
+                                    clip-rule="evenodd"
+                                    d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                    fill="#637381"
+                                  ></path>
+                                </g>
+                              </svg>
+                            </span>
+                          </div>
+                    </div>
+                  </div>
+                  <div x-data="tagInput">
+                    <label
+                      class="mb-3 block text-sm font-medium text-black dark:text-white"
+                    >
+                      Tags
+                    </label>
+                    <input
+                      x-model="tagInput" @keyup="suggestTags"
+                      type="text"
+                      placeholder="Push your hash tags"
+                      name="tags"
+                      id="tags"
+                      class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    />
+                    
+                    <ul x-show="showSuggestions" class="max-h-[400px] overflow-y-scroll" @click.away="hideSuggestions">
+                      <li class="flex" @click="addNewTag()">
+                        <span>Add new tag</span> 
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z" clip-rule="evenodd" />
+                      </svg>
+                      </li>
+                      <template x-for="tag in filteredTags">
+                        <li x-text="tag.name" @click="selectTag(tag)"></li>
+                      </template>
+                      
+                  </ul>
+                  <div class=" max-w-[300px] flex flex-wrap gap-2 mt-7">
+                    <template x-for="tag in selectedTags" class="selected-tag"><p  x-text="'#' + tag.name"></p></template>
+                </div>
+                  </div>
+                </div>
+
+                <!-- File upload -->
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+                >
+                  <div
+                    class="border-b border-stroke px-6.5 py-4 dark:border-strokedark"
+                  >
+                    <h3 class="font-medium text-black dark:text-white">
+                      Attach images
+                    </h3>
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5" >
+                    <div x-data="{ checkImg: <%= postData!=null ? 'true' : 'false' %> }">
+                        <div class="border rounded-md p-2 relative" x-show="checkImg">
+                          <button class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex justify-center items-center" type="button" @click="checkImg = false">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                          <img src="<%= postData && postData.imgUrl ? postData.imgUrl : '' %>" class="w-full h-auto">
+                        </div>
+                      <div x-show="!checkImg" class="flex justify-center items-center min-h-[200px]" x-data="{ isDragOver: false, file: null }">
+                        <div
+                          class="dropzone bg-white border-2 border-dashed rounded-md p-8 text-center cursor-pointer"
+                          :class="{'hidden': file !== null, 'border-gray-700': isDragOver, 'border-gray-400': !isDragOver}"
+                          @dragover.prevent="isDragOver = true"
+                          @dragleave="isDragOver = false"
+                          @drop.prevent="isDragOver = false; file = $event.dataTransfer.files[0]; $event.dataTransfer.clearData()"
+                          @click="$refs.fileInput.click()"
+                        >
+                          <h2 class="text-lg font-medium">Drop file here</h2>
+                          <p class="text-gray-500">or click to upload</p>
+                          <input type="file" x-ref="fileInput" id="img" name="image" class="hidden" @change="file = $event.target.files[0]">
+                        </div>
+  
+                        <template x-if="file !== null">
+                          <div class="border rounded-md p-2 relative">
+                            <button class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex justify-center items-center" type="button" @click="file = null">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                            <img :src="URL.createObjectURL(file)" class="w-full h-auto">
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+              <button
+                class="inline-flex items-center gap-2 rounded border border-green-600 bg-green-600 px-8 py-3 text-white hover:bg-transparent hover:text-green-600 focus:outline-none focus:ring active:text-green-500 text-center" 
+                type="submit"
+              >
+                <span class="text-sm font-medium mx-auto"> Save </span>
+                
+              </button>
+            </div>
+              <!-- ====== Form Elements Section End -->
+            </form>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+    <script>
+      const onSendData = (url) => {
+        const content = document.querySelector('#content')
+          const title = document.querySelector('#title')
+          const status = document.querySelector('#status')
+          const categoryId = document.querySelector('#categoryId')
+          const createFormData = {
+            content: content.value,
+            title: title.value,
+            status: status.value,
+            categoryId: categoryId.value,
+            imgUrl: url
+          }
+          console.log(createFormData)
+          fetch('/blog-post/<%= page == "Add New"? "add-new": "update/" + id%>', {
+            method: "<%= page=='Add New'? 'POST' : 'PUT'%>",
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(createFormData)
+            })
+            .then(response => response.json())
+            .then(data => {
+              Swal.fire({
+              title: "Success!",
+              text: data.message,
+              icon: "success",
+              }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.reload()
+              } 
+            });
+              })
+            .catch(error => {
+                console.error(error);
+              });
+      }
+  document.getElementById('add-new-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const fileInput = document.getElementById('img');
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    let url = "<%=postData?postData.imgUrl:'null'%>"
+    if (file) {
+      formData.append('image', file);
+      fetch('/file', {
+          method: 'POST',
+          body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+          onSendData(data.filePath)
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+    else{
+      onSendData(url)
+    }
+          
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+          ClassicEditor
+            .create(document.querySelector("#content"))
+            .then(editor => {
+                    const editableElement = editor.ui.view.editable.element;
+                    editableElement.classList.add("min-h-[500px]");
+                })
+            .catch(error => {
+              console.error(error);
+            });
+            
+        });
+        function tagInput() {
+          return {
+            tagInput: '',
+            filteredTags: [],
+            selectedTags: [],
+            showSuggestions: false,
+
+            suggestTags() {
+              this.filteredTags = tags.filter(tag => tag.name.includes(this.tagInput));
+              this.showSuggestions = true;
+            },
+
+            selectTag(tag) {
+              this.selectedTags.push(tag);
+              console.log(this.selectTags)
+              this.tagInput = '';
+              this.showSuggestions = false;
+            },
+            hideSuggestions() {
+              this.showSuggestions = false;
+            },
+            addNewTag() {
+              if (this.tagInput.trim() !== '') {
+                this.selectedTags.push({ name: this.tagInput });
+                this.tagInput = '';
+              }
+            }
+          };
+        }
+        var tags = JSON.parse('<%- JSON.stringify(tags) %>');
+        </script>
+  </body>
+</html>
+
+

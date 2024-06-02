@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>
+      Manage User
+    </title>
+    <script>
+      function checker(e){
+        if(!window.confirm("Are you sure delete user!")){
+          e.preventDefault();
+        } else {
+          return;
+        }
+      }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <div
+              class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
+            >
+            <!-- Breadcrumb Start -->
+            <div
+              class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <h2 class="text-title-md2 font-bold text-black dark:text-white">
+                Permission Management
+              </h2>
+
+              <nav>
+                <ol class="flex items-center gap-2">
+                  <li>
+                    <a class="font-medium" href="../dashboard">Dashboard /</a>
+                  </li>
+                  <li>
+                    <a class="font-medium" href="/user/get-role">Role Manager /</a>
+                  </li>
+                  <li class="font-medium text-primary">Permission Matrix</li>
+                </ol>
+              </nav>
+            </div>
+            <!-- Breadcrumb End -->
+            <div class="max-w-full overflow-x-auto">
+              <table class="w-full table-auto">
+                <thead>
+                  <tr class="bg-gray-2 text-left dark:bg-meta-4">
+                    <th
+                      class="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                    >
+                      Role
+                    </th>
+                    <% for(let i=0; i < roles.length; i++) { %>
+                    <th
+                      class="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white"
+                    >
+                      <%= roles[i].name %>
+                    </th>
+                    <% } %>
+                  </tr>
+                </thead>
+                <form action="/user/update-permission-role" method="POST" id="update-form">
+                  <tbody>
+                    <% for(let j=0; j < permissions.length; j++) { %>
+                    <tr>
+                      <td
+                        class="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11"
+                      >
+                        <h5 class="font-medium text-black dark:text-white"><%= permissions[j].name %></h5>
+                      </td>
+                      <% for(let k=0; k < roles.length; k++) { %>
+                      <th class="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
+                        <input
+                          class="mr-3"
+                          type="checkbox"
+                          name="<%= `${roles[k].id},${permissions[j].id}` %>"
+                          id="checkboxLabelTwo"
+                          <% if(permissions[j].roles.length>0 && permissions[j].roles[k].id) {%> checked <%}%>
+                        />
+                      </th>
+                      <% } %>
+                    </tr>
+                    <% } %>
+                    
+                  </tbody>
+                </form>
+              </table>
+              <!-- <div class="my-4">
+                  <a
+                    href="/user/permissions"
+                    class="inline-flex items-center justify-center gap-2.5 bg-blue-500 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                  >
+                    Save change
+                  </a>
+              </div> -->
+              <button
+                  class="inline-flex items-center justify-center gap-2.5 bg-blue-500 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                  form="update-form"
+                >
+                  Save change
+                </button>
+            </div>
+          </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+  </body>
+</html>
+

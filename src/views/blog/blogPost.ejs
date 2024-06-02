@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>
+     Dashboard
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <link rel="stylesheet" href="/css/output.css">
+    <script>
+       function onHandleDelete (e, id){
+        Swal.fire({
+        title: "Are you sure to delete this post?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+      }).then((result) => {
+        if (!result.isConfirmed) {
+          e.preventDefault()
+        }else {
+          fetch(`/blog-post/${id}`, {
+            method: 'DELETE'
+          })
+          .then(()=>{
+            Swal.fire({
+            title: "Deleted!",
+            text: "Your post has been deleted.",
+            icon: "success",
+          }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload();
+          } 
+        });
+          }).catch((error)=>console.log(error))
+        }
+});
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+        const searchKey = document.querySelector("#searchKey")
+        const searchLink = document.querySelector("#searchLink");
+        searchKey.addEventListener("input", function(e) {
+          const searchValue = e.target.value;
+          searchLink.href = "/blog-post?title=" + searchValue;
+        })
+      })
+    </script>
+  </head>
+
+  <body
+  class="relative z-0"
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+<!-- ===== Preloader Start ===== -->
+  <%- include("../partials/preloader.ejs") %>
+  <!-- ===== Preloader End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <%- include("../partials/sidebar.ejs")%>
+      <!-- ===== Sidebar End ===== -->
+
+
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <%- include("../partials/header.ejs") %>
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="">
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <!-- Breadcrumb Start -->
+            <div
+              class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <h2 class="text-title-md2 font-bold text-black dark:text-white">
+                Blog Post Management
+              </h2>
+
+              <nav>
+                <ol class="flex items-center gap-2">
+                  <li>
+                    <a class="font-medium" href="/dashboard">Dashboard /</a>
+                  </li>
+                  <li class="font-medium text-primary">Blog Posts</li>
+                </ol>
+              </nav>
+            </div>
+            <!-- Breadcrumb End -->
+            <div class="flex justify-between">
+            <div class="hidden sm:block">
+                <div x-data="{ isOpen: false }" class="relative mt-11 text-xl text-black">
+                  <button @click="isOpen = true" type="button" class="absolute left-0 top-1/2 -translate-y-1/2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
+                    </svg>
+                  </button>
+                  <span class="ml-11">Filter</span>
+                  <div x-show="isOpen" class="absolute w-[1400px] z-10 bg-white shadow">
+                    <div class="fixed inset-0 bg-black opacity-50"></div>
+                    <div @click.away="isOpen = false" x-data="{ formData: {} }" class="bg-white relative  p-8">
+                      <form @submit.prevent="submitForm">
+                        <div class="grid grid-cols-3 gap-4">
+                        <div>
+                        <label
+                          class="mb-3 block text-sm font-medium text-black dark:text-white"
+                        >
+                          Status
+                        </label>
+                        <div
+                          x-data="{ isOptionSelected: false }"
+                          class="relative z-20 bg-white dark:bg-form-input"
+
+                        >
+                          <select
+                            class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                            :class="isOptionSelected && 'text-black dark:text-white'"
+                            @change="isOptionSelected = true"
+                            name="status"
+                            id="status" 
+                            x-model="formData.status"                    
+                          >
+                          <%for(item of status) {%>
+                            <option value="<%= item%>" class="text-body"><%= item%></option>
+                            <%}%>
+                          </select>
+                          
+                          <span
+                            class="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g opacity="0.8">
+                                <path
+                                  fill-rule="evenodd"
+                                  clip-rule="evenodd"
+                                  d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                  fill="#637381"
+                                ></path>
+                              </g>
+                            </svg>
+                          </span>
+                        </div>
+                        </div>
+                        <div>
+                        <label
+                          class="mb-3 block text-sm font-medium text-black dark:text-white"
+                        >
+                          Title
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Blog's title..."
+                          name="title"
+                          id="title"
+                          value=""
+                          x-model="formData.title"
+                          class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                        />
+                        </div>
+                        <div>
+                        <label
+                          class="mb-3 block text-sm font-medium text-black dark:text-white"
+                        >
+                          Content
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Content..."
+                          name="content"
+                          id="content"
+                          value=""
+                          x-model="formData.content"
+                          class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                        />
+                        </div>
+                        <div>
+                          <label
+                            class="mb-3 block text-sm font-medium text-black dark:text-white"
+                          >
+                            Category
+                          </label>
+                          <div
+                            x-data="{ isOptionSelected: false }"
+                            class="relative z-20 bg-white dark:bg-form-input"
+                          >
+                            <select
+                              class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                              :class="isOptionSelected && 'text-black dark:text-white'"
+                              @change="isOptionSelected = true"
+                              name="categoryId"
+                              x-model="formData.categoryId"
+                              id="categoryId"
+                            >
+                            <%for(item of categories) {%>
+                              <option value="<%= item.id%>" class="text-body"><%= item.name%></option>
+                              <%}%>
+                            </select>
+                            
+                            <span
+                              class="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+                            >
+                              <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <g opacity="0.8">
+                                  <path
+                                    fill-rule="evenodd"
+                                    clip-rule="evenodd"
+                                    d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                    fill="#637381"
+                                  ></path>
+                                </g>
+                              </svg>
+                            </span>
+                          </div>
+                        </div>
+                        </div>
+                        <button
+                        class="flex mt-8 ml-[1200px] items-center gap-2 rounded border border-primary bg-primary px-8 py-3 text-white hover:bg-transparent hover:text-primary focus:outline-none focus:ring active:text-primary"
+                      >
+                        <span class="text-sm font-medium"> Next </span>
+                      
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-6 h-6">
+                          <path d="M5.055 7.06C3.805 6.347 2.25 7.25 2.25 8.69v8.122c0 1.44 1.555 2.343 2.805 1.628L12 14.471v2.34c0 1.44 1.555 2.343 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256l-7.108-4.061C13.555 6.346 12 7.249 12 8.689v2.34L5.055 7.061Z" />
+                        </svg>
+                        
+                        
+                        </button>
+                      </form>
+                    </div>
+                    
+                  </div>
+                </div>
+                
+            </div>
+            <a
+            class="inline-flex items-center gap-2 rounded border border-green-600 bg-green-600 px-8 py-3 h-[60px] text-white hover:bg-transparent hover:text-green-600 focus:outline-none focus:ring active:text-green-500"
+            href="/blog-post/form"
+          >
+            <span class="text-sm font-medium"> Add New Post </span>
+          
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+            
+            </a>
+        </div>
+            <!-- ====== Table Section Start -->
+            <div class="flex flex-col gap-10 mt-5" id="table">
+              <div
+              class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
+            >
+              <div class="max-w-full overflow-x-auto">
+                <table class="w-full table-auto">
+                  <thead>
+                    <tr class="bg-gray-2 text-left dark:bg-meta-4">
+                      <th
+                        class="px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                      >
+                        #ID
+                      </th>
+                      <th
+                        class="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white"
+                      >
+                        Title
+                      </th>
+                      <th
+                        class="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white"
+                      >
+                        Image
+                      </th>
+                      <th
+                        class="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white"
+                      >
+                        Content
+                      </th>
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Author
+                      </th>
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Category
+                      </th>
+                      <!-- <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Comments
+                      </th> -->
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Tags
+                      </th>
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Status
+                      </th>
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Created Time
+                      </th>
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Updated Time
+                      </th>
+                      <th class="px-4 py-4 font-medium text-black dark:text-white">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(var i=0; i < data.length; i++) { %>
+                      <tr>
+                        <td
+                          class="border-b border-[#eee] dark:border-strokedark xl:pl-11"
+                        >
+                          <h5 class="font-medium text-black dark:text-white"><%=data[i].id%></h5>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark" x-data="{ isOpen: false }">
+                          <p class="text-black dark:text-white truncate max-w-[150px]" @mouseover="isOpen = true"
+                          @mouseleave="isOpen = false"><%=data[i].title%></p>
+                          <div x-show="isOpen"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform scale-95"
+                            x-transition:enter-end="opacity-100 transform scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 transform scale-100"
+                            x-transition:leave-end="opacity-0 transform scale-95"
+                            class="popover absolute bg-gray-500 border shadow-md mt-2 px-4 py-2 rounded-lg">
+                            
+                            <p class="text-white"><%=data[i].title%></p>
+                        </div>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white"><img class="max-w-[150px] mx-auto" src="<%=data[i].imgUrl%>"/></p>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark" x-data="{ isOpen: false }">
+                          <p class="text-black dark:text-white truncate max-w-[200px]" @mouseover="isOpen = true"
+                          @mouseleave="isOpen = false"><%=data[i].content%></p>
+                          <div x-show="isOpen"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform scale-95"
+                            x-transition:enter-end="opacity-100 transform scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 transform scale-100"
+                            x-transition:leave-end="opacity-0 transform scale-95"
+                            class="popover absolute bg-gray-500 max-w-[200px] border shadow-md mt-2 px-4 py-2 rounded-lg">
+                            
+                            <p class="text-white"><%=data[i].content%></p>
+                        </div>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white"><%=data[i].user.username%></p>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white"><%=data[i].category.name%></p>
+                        </td>
+                        <!-- <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white"><%=data[i].id%></p>
+                        </td> -->
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white">
+                            <%for (item of data[i].tags){%>
+                              <span>#<%=item.name%></span>
+                            <%}%>
+                          </p>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p
+                            class="inline-flex rounded-full <% if(data[i].status == 'trash'){%> bg-red-600 text-red-600 <%}%> <% if(data[i].status == 'pending'){%> bg-blue-600 text-blue-600 <%}%> <% if(data[i].status == 'draft'){%> bg-warning text-warning <%}%> bg-success text-success bg-opacity-10 px-3 py-1 text-sm font-medium "
+                          >
+                          <%=data[i].status%>
+        
+                          </p>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white"><%
+                            const time = new Date(data[i].createdAt);
+                            const formattedDate = time.toDateString();
+                          %>
+                          <%=formattedDate%></p>
+                        </td>
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <p class="text-black dark:text-white"><%=data[i].updatedAt?data[i].updatedAt:'Not update yet'%></p>
+                        </td>
+                        
+                        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                          <div class="flex items-center space-x-3.5">
+                            <a href="/blog-post/form/<%= data[i].id%>" class="hover:text-primary">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                              </svg>
+                            </a>
+                            <a class="hover:text-primary" type="button" onclick="onHandleDelete(event, '<%= data[i].id%>')">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">  
+                                <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                              </svg>
+                              
+                            </a>
+                          
+                          </div>
+                        </td>
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            </div>
+            <!-- ====== Table Section End -->
+            <div class="flex justify-center mt-7 items-center">
+            <div id="mainContainer" class="flex gap-x-4">
+              <button class="goPrev w-8 h-8 rounded-full">
+                  <i class="fa-solid fa-angle-left w-4 h-4 inline-flex justify-center"></i>
+              </button>
+              <div class="pagination flex gap-x-2"></div>
+              <button class="goNext w-8 h-8 rounded-full">
+                  <i class="fa-solid fa-angle-right w-4 h-4 inline-flex justify-center"></i>
+              </button>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+    <script>
+      const min = 1;
+      const max = 16;
+      const paginationSpan = document.createElement("span");
+      paginationSpan.innerText = "...";
+      paginationSpan.classList = "flex justify-center py-1 select-none min-w-[2.625rem]"
+      const paginationDiv = document.querySelector(".pagination");
+      const goPrevBtn = document.querySelector(".goPrev");
+      const goNextBtn = document.querySelector(".goNext");
+      goPrevBtn.addEventListener("click", () => handlePrevNextClick("prev"));
+      goNextBtn.addEventListener("click", () => handlePrevNextClick("next"));
+      const mainContainer = document.getElementById("mainContainer");
+      let activePage;
+
+      const createPaginationNumBtns = (startIdx) => {
+          // 10 - 16
+          if (startIdx >= 10 && startIdx <= max) {
+              let newStartIdx = startIdx - (6 - (max - startIdx));
+              while (newStartIdx <= max) {
+                  const paginationNumBtn = document.createElement("button");
+                  paginationNumBtn.innerText = newStartIdx;
+                  paginationNumBtn.classList = "py-1 px-3 rounded-sm hover:bg-slate-200 min-w-[2.625rem]";
+                  paginationNumBtn.addEventListener("click", (e) => handleNumBtnClick(e));
+                  paginationDiv.appendChild(paginationNumBtn);
+                  newStartIdx++;
+              }
+          }
+          // 1 - 9
+          else if (startIdx < 10 && startIdx >= min) {
+              let tempMax = startIdx + 7;
+              while (startIdx < tempMax) {
+                  const paginationNumBtn = document.createElement("button");
+                  paginationNumBtn.innerText = startIdx;
+                  paginationNumBtn.classList = "py-1 px-3 rounded-sm hover:bg-slate-200 min-w-[2.625rem]";
+                  paginationNumBtn.addEventListener("click", (e) => handleNumBtnClick(e));
+
+                  if (tempMax - startIdx === 2) {
+                      paginationDiv.appendChild(paginationSpan);
+                      paginationNumBtn.innerText = max;
+                      paginationDiv.appendChild(paginationNumBtn);
+                      break;
+                  }
+                  
+                  paginationDiv.appendChild(paginationNumBtn);
+                  startIdx++;
+              }
+          }
+          else {
+              mainContainer.classList.remove("flex");
+              mainContainer.classList.add("hidden");
+          }
+      }
+
+      const checkPrevNextDisabled = () => {
+          // prev
+          if (parseInt(activePage.innerText) === min) {
+              goPrevBtn.disabled = true;
+              goPrevBtn.classList.add("bg-slate-100", "text-slate-300")
+              goPrevBtn.classList.remove("hover:bg-slate-200")
+          } else {
+              goPrevBtn.disabled = false;
+              goPrevBtn.classList.remove("text-slate-300");
+              goPrevBtn.classList.add("bg-slate-100", "text-black", "hover:bg-slate-200")
+          }
+
+          // next
+          if (parseInt(activePage.innerText) === max) {
+              goNextBtn.disabled = true;
+              goNextBtn.classList.add("bg-slate-100", "text-slate-300")
+              goNextBtn.classList.remove("hover:bg-slate-200");
+          } else {
+              goNextBtn.disabled = false;
+              goNextBtn.classList.remove("text-slate-300");
+              goNextBtn.classList.add("bg-slate-100", "text-black", "hover:bg-slate-200")
+          }
+      }
+
+      const changePaginationNums = (startIdx) => {
+          // 1 - 9
+          if (startIdx < 10 && startIdx >= min) {
+              let i = 0;
+              while (i < 5) {
+                  paginationDiv.children[i].innerText = startIdx;
+                  i++;
+                  startIdx++;
+              }
+              paginationDiv.children[i].replaceWith(paginationSpan)
+          }
+          // 10 - 16
+          else if (startIdx >= 10 && startIdx <= max) {
+              let tempStartIdx = startIdx;
+              if (startIdx > 10) startIdx = 10;
+              let i = 0;
+              let tempEle = document.querySelector(".activePage");
+              tempEle.classList.remove("activePage", "bg-slate-100")
+
+              while (i < 7) {
+                  if (i === 5) {
+                      const paginationNumBtn = document.createElement("button");
+                      paginationNumBtn.innerText = startIdx;
+                      paginationNumBtn.classList = "py-1 px-3 rounded-sm hover:bg-slate-200 min-w-[2.625rem]";
+                      paginationNumBtn.addEventListener("click", (e) => handleNumBtnClick(e));
+                      paginationDiv.children[i].replaceWith(paginationNumBtn)
+                  }
+                  paginationDiv.children[i].innerText = startIdx;
+                  i++;
+                  startIdx++;
+              }
+
+              activePage = paginationDiv.children[tempStartIdx - 10];
+              activePage.classList.add("activePage", "bg-slate-100");
+          }
+      }
+
+      const handleNumBtnClick = (e) => {
+          location.href= `/blog-post?page=${e.target.innerText}`
+      }
+
+      const handlePrevNextClick = (type) => {
+          if (type === "prev") {
+              changePaginationNums(parseInt(activePage.innerText) - 1);
+              checkPrevNextDisabled(); 
+          } else if (type === "next") {
+              changePaginationNums(parseInt(activePage.innerText) + 1);
+              checkPrevNextDisabled(); 
+          }
+      }
+
+      const initialSetup = () => {
+          // 1 (min) - 16 (max)
+          const startActivePage = 1;
+          createPaginationNumBtns(startActivePage);
+          if (mainContainer.classList.contains("hidden")) return;
+          paginationDiv.children[0].classList.add("activePage")
+          activePage = document.querySelector(".activePage");
+          activePage.classList.add("bg-slate-100");
+          checkPrevNextDisabled();
+      }
+
+      initialSetup();
+      function updateTable(html) {
+      var tempElement = document.createElement('div');
+      tempElement.innerHTML = html;
+
+      var tableElement = tempElement.querySelector('#table');
+      var currentTableElement = document.getElementById('table');
+      currentTableElement.innerHTML = tableElement.innerHTML;
+    }
+      function submitForm () {
+        fetch(`/blog-post/filter`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.formData)
+          })
+          .then(function(response) {
+            if (response.ok) {
+              return response.text(); // Đọc nội dung của trang HTML đã render
+            } else {
+              throw new Error('Có lỗi xảy ra khi gửi yêu cầu.');
+            }
+          })
+          .then(function(html) {
+            updateTable(html);
+          })
+          .catch((error)=>{
+            Swal.fire({
+            title: "Error has occured!",
+            text: error
+          })
+          })
+        }
+    </script>
+  </body>
+</html>
+
+
